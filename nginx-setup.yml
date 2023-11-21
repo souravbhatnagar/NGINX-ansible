@@ -1,0 +1,24 @@
+- hosts: my_vms
+  become: true
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+
+    - name: Manage NGINX service
+      systemd:
+        name: nginx
+        enabled: yes
+        state: started
+
+    - name: Copy NGINX configuration file
+      template:
+        src: ./nginx-config/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+
+    - name: Reload NGINX service
+      service:
+        name: nginx
+        state: reloaded
+

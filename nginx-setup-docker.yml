@@ -1,0 +1,43 @@
+---
+# This playbook installs nginx as a Docker container and mounts a volume
+
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Pull nginx Docker image
+      community.docker.docker_image:
+        name: nginx
+        source: pull
+
+    - name: Run nginx Docker container
+      community.docker.docker_container:
+        name: nginx
+        image: nginx
+        state: started
+        ports:
+          - "12980:80"
+        volumes:
+          - "./nginx-config/nginx.conf:/etc/nginx/nginx.conf:ro"
+
